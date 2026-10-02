@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OBSカメラ</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- WebRTC接続の仲介にPeerJS(公開クラウド)を使用。自前サーバー不要 -->
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<!-- data-mode は app.js が "home" | "camera" | "control" | "obs" に設定する -->
+<body data-mode="home">
+
+  <!-- ===== 映像ステージ：カメラ端末ではプレビュー、OBS画面では受信映像 ===== -->
+  <main id="stage">
+    <video id="video" autoplay playsinline muted></video>
+    <!-- クロマキー有効時はこちらに加工後の映像を描画 -->
+    <canvas id="chroma" hidden></canvas>
+  </main>
+
+  <!-- ===== 操作UI（OBS出力モードでは非表示） ===== -->
+  <aside id="ui">
+    <header class="top"><h1>OBSカメラ</h1></header>
+    <p id="message" role="status"></p>
+
+    <!-- ホーム：ルームコードと各端末用URL -->
+    <section class="group only-home">
+      <h2>ルームコード</h2>
+      <input id="roomInput" type="text" maxlength="12" aria-label="ルームコード">
+      <p class="hint">3台で同じコードを使います。推測されにくい文字列にしてください。</p>
+      <h2>各端末で開くURL</h2>
+      <div id="links"></div>
+    </section>
+
+    <!-- カメラ端末(A) -->
+    <section class="group only-camera">
+      <h2>カメラ端末</h2>
+      <label>デバイス <select data-key="deviceId"></select></label>
+      <label>解像度
+        <select data-key="resolution">
+          <option value="640x480">640 × 480</option>
+          <option value="1280x720">1280 × 720</option>
+          <option value="1920x1080">1920 × 1080</option>
+        </select>
+      </label>
+    </section>
+
+    <!-- 操作端末(B) -->
+    <section class="group only-control">
+      <h2>カメラ切り替え</h2>
+      <label>デバイス <select data-key="deviceId"></select></label>
+      <label>解像度
+        <select data-key="resolution">
+          <option value="640x480">640 × 480</option>
+          <option value="1280x720">1280 × 720</option>
+          <option value="1920x1080">1920 × 1080</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="group only-control">
+      <h2>映像調整</h2>
+      <label class="check"><input type="checkbox" data-key="mirror"> 左右反転</label>
+      <label>明るさ <output></output><input type="range" data-key="brightness" min="0" max="200" step="1"></label>
+      <label>コントラスト <output></output><input type="range" data-key="contrast" min="0" max="200" step="1"></label>
+      <label>彩度 <output></output><input type="range" data-key="saturate" min="0" max="300" step="1"></label>
+      <label>色相 <output></output><input type="range" data-key="hue" min="0" max="360" step="1"></label>
+      <label>ぼかし <output></output><input type="range" data-key="blur" min="0" max="20" step="0.5"></label>
+      <button id="resetBtn" type="button">調整をリセット</button>
+    </section>
+
+    <section class="group only-control">
+      <h2>グリーンバック消去</h2>
+      <label class="check"><input type="checkbox" data-key="chromaOn"> 有効にする</label>
+      <label>キーの色 <input type="color" data-key="keyColor"></label>
+      <label>範囲 <output></output><input type="range" data-key="similarity" min="0" max="100" step="1"></label>
+      <label>境界のなめらかさ <output></output><input type="range" data-key="smooth" min="0" max="50" step="1"></label>
+    </section>
+  </aside>
+
+  <script src="app.js"></script>
+</body>
+</html>

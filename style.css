@@ -1,0 +1,104 @@
+/* ===== デザイントークン（OBSのUIに馴染むダークテーマ） ===== */
+:root {
+  --bg: #17181d;
+  --panel: #20222a;
+  --line: #333642;
+  --text: #e4e6ec;
+  --muted: #8b90a0;
+  --accent: #7c8cff;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP", system-ui, sans-serif;
+  font-size: 14px;
+}
+
+/* ===== レイアウト：左に映像、右に操作パネル ===== */
+body { display: grid; grid-template-columns: 1fr 340px; }
+
+#stage {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  /* 透過が分かるチェック柄（設定モードのみ。OBSモードで上書き） */
+  background:
+    conic-gradient(#2a2c35 25%, #22242b 0 50%, #2a2c35 0 75%, #22242b 0) 0 0 / 24px 24px;
+}
+#stage video, #stage canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+[hidden] { display: none !important; }
+
+#ui {
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+}
+.top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+h1 { font-size: 16px; margin: 0; }
+h2 { font-size: 13px; margin: 0 0 10px; color: var(--muted); font-weight: 600; }
+
+
+.group { padding: 14px 0; border-top: 1px solid var(--line); }
+label { display: block; margin-bottom: 10px; color: var(--text); }
+label output { float: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.check { display: flex; align-items: center; gap: 8px; }
+
+select, input[type="text"], button {
+  width: 100%;
+  margin-top: 4px;
+  padding: 7px 8px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+}
+button { cursor: pointer; width: auto; margin-top: 0; }
+#resetBtn, .copy { width: 100%; margin-top: 6px; }
+button:hover { border-color: var(--accent); }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+input[type="color"] { width: 100%; height: 32px; padding: 2px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+#message { min-height: 1.4em; margin: 0 0 8px; color: #ffb36b; font-size: 12px; }
+
+/* ===== モード別の表示切り替え ===== */
+.only-home, .only-camera, .only-control { display: none; }
+body[data-mode="home"]    .only-home,
+body[data-mode="camera"]  .only-camera,
+body[data-mode="control"] .only-control { display: block; }
+
+/* ホーム・コントロールは操作パネルのみ（映像は出さない） */
+body[data-mode="home"], body[data-mode="control"] { grid-template-columns: 1fr; }
+body[data-mode="home"] #stage, body[data-mode="control"] #stage { display: none; }
+body[data-mode="home"] #ui, body[data-mode="control"] #ui { max-width: 560px; margin: 0 auto; width: 100%; border: 0; }
+
+.hint { margin: 4px 0 14px; color: var(--muted); font-size: 12px; }
+.link { margin-bottom: 12px; }
+.link span { display: block; margin-bottom: 2px; }
+
+/* ===== OBS出力モード：映像のみ・全画面・背景透過 ===== */
+body[data-mode="obs"] { display: block; background: transparent !important; overflow: hidden; }
+html:has(body[data-mode="obs"]) { background: transparent; }
+body[data-mode="obs"] #ui { display: none; }
+body[data-mode="obs"] #stage {
+  position: fixed; inset: 0; width: 100vw; height: 100vh;
+  margin: 0; padding: 0; background: transparent;
+}
+
+/* カメラ端末(スマホ)では映像を上、情報を下に */
+@media (max-width: 760px) {
+  body[data-mode="camera"] { grid-template-columns: 1fr; grid-template-rows: 45vh 1fr; }
+}
